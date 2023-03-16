@@ -1,4 +1,5 @@
 # 網路爬蟲
+自動抓取今日股票，並存入資料庫
 ## 套件
 `pip install selenium` 載入selenium套件\
 `https://chromedriver.chromium.org/downloads` 下載driver套件

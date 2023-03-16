@@ -1,36 +1,49 @@
-import time
+import pymysql
+import datetime
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.keys import Keys
+def insert(sid,name,price):
+    time = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    db = pymysql.connect(host='localhost', port=3306, user='root', passwd='', db='stonk', charset='utf8')
+    cursor = db.cursor()
+    quary = "INSERT into `data`(`sid`,`name`,`price`,`time`) VALUES " \
+            "('" + sid + "'," + "'" + name + "'," + "'" + price + "'," + "'" + time + "')"
+    print(quary)
+    try:
+        cursor.execute(quary)
+        db.commit()
+        print('success')
+    except Exception as ex:
+        db.rollback()
+        print(ex)
+    db.close()
 def login():
     option = webdriver.ChromeOptions()
     option.add_experimental_option("detach", True)
     path = "C:/Users/User/Desktop/web-crawler/lib/chromedriver.exe"
-    driver = webdriver.Chrome(path, options = option)
+    driver = webdriver.Chrome(path, options=option)
+    url = "https://www.google.com/"
+    datalist = ["2330","2317"]
+    dataname = ["台積電","鴻海"]
+    size = 2
+    driver.implicitly_wait(1)
+    driver.get(url)
     print("今日股價")
-    #台積電
-    url = "https://tw.search.yahoo.com/search?p=2330&fr=finance&fr2=p%3Afinvsrp%2Cm%3Asb"
-    driver.get(url)
-    elem = "fin_quotePrice"
-    title = driver.find_elements(By.CLASS_NAME, elem)
-    for i in title:
-        print("台積電:" + i.text)
-    #聯發科
-    url = "https://tw.search.yahoo.com/search;_ylt=Awrt4BvBBw9keQ0U425r1gt.;_ylc=X1MDMjExNDcwNTAwMwRfcgMyBGZyA2ZpbmFuY2UEZnIyA3NiLXRvcARncHJpZANkdjJ5dExDZ1EzS0lRME05YXRscGxBBG5fcnNsdAMwBG5fc3VnZwMxMARvcmlnaW4DdHcuc2VhcmNoLnlhaG9vLmNvbQRwb3MDMARwcXN0cgMEcHFzdHJsAzAEcXN0cmwDNARxdWVyeQMyNDU0BHRfc3RtcAMxNjc4NzA2Njc5?p=2454&fr2=sb-top&fr=finance"
-    driver.get(url)
-    elem = "fin_quotePrice"
-    title = driver.find_elements(By.CLASS_NAME, elem)
-    for i in title:
-        print("聯發科:" + i.text)
-    # 鴻海
-    url = "https://tw.search.yahoo.com/search;_ylt=AwrtgxItCA9kvy4UTDRr1gt.;_ylc=X1MDMjExNDcwNTAwMwRfcgMyBGZyA2ZpbmFuY2UEZnIyA3NiLXRvcARncHJpZANaU0g1anBUNVRTYTFUV0NTNTYwZk9BBG5fcnNsdAMwBG5fc3VnZwMxMARvcmlnaW4DdHcuc2VhcmNoLnlhaG9vLmNvbQRwb3MDMARwcXN0cgMEcHFzdHJsAzAEcXN0cmwDNARxdWVyeQMyMzE3BHRfc3RtcAMxNjc4NzA2NzM0?p=2317&fr2=sb-top&fr=finance"
-    driver.get(url)
-    elem = "fin_quotePrice"
-    title = driver.find_elements(By.CLASS_NAME, elem)
-    for i in title:
-        print("鴻海:" + i.text)
-
+    for i in range(size):
+        try:
+            search = driver.find_element(By.NAME, 'q')
+            search.send_keys(datalist[i])
+            search.send_keys(Keys.ENTER)
+        except NoSuchElementException:
+            print('無法定位')
+        elem = "IsqQVc"
+        title = driver.find_elements(By.CLASS_NAME, elem)
+        print(dataname[i] + ":" + title[0].text)
+        insert(datalist[i],dataname[i],title[0].text)
+        driver.back()
     driver.quit()
+
 
 if __name__ == '__main__':
     login()
